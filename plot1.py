@@ -8,12 +8,13 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
+ #plotする範囲を指定、plot数も指定
 x = np.linspace(0, 20, 10)
 
  #自己位置
-x = []
+x = [] #現在位置を格納するリスト
 y = []
-pos_x = 0
+pos_x = 0 #現在位置
 pos_y = 0
 
  #目標位置
@@ -30,7 +31,7 @@ while n < G_x and G_y == 0:
     y.append(pos_y)
     pos_x = pos_x + V_x
     plt.plot(x,y,"-o")
-    plt.xlim(0,20)
+    plt.xlim(0,20) #表の軸を0~20に固定
     plt.show()
     n += 1 #インクリメント
     time.sleep(1)
