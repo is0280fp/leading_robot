@@ -13,27 +13,26 @@ import matplotlib.pyplot as plt
 class Leader(object):
     def __init__(self, goal_x):
         # 目標位置
-        self.G_x = goal_x
+        self.goal_x = goal_x
         # 自己位置
         self.x = 0  # 現在位置
         # 速度
-        self.V_x = 0
-        self.dis = 0
+        self.v_x = 0
 
     def measure(self):
         pass
 
     def decide_action(self):
-        self.dis = self.G_x - self.x
-        if self.dis > 0:
-            self.V_x = 1
-        elif self.dis == 0:
-            self.V_x = 0
+        dis = self.goal_x - self.x  # ゴールとLeader現在位置との距離
+        if dis > 0:
+            self.v_x = 1
+        elif dis == 0:
+            self.v_x = 0
         else:
-            self.V_x = -1
+            self.v_x = -1
 
     def move(self):
-        self.x = self.x + self.V_x
+        self.x = self.x + self.v_x
 
 
 # Follower
@@ -45,8 +44,7 @@ class Follower(object):
         # 自己位置
         self.x = 0  # 現在位置
         # FollowerがLeaderについていく判断
-        self.dis = 0
-        self.V_x = 0
+        self.v_x = 0
 
     def measure(self, target_x, self_x):
         # LeaderとFollowerの実距離
@@ -54,11 +52,11 @@ class Follower(object):
         self.x = self_x
 
     def decide_action(self):
-        self.dis = self.target_x - self.x
-        self.V_x = self.dis - self.opt_dis
+        dis = self.target_x - self.x
+        self.v_x = dis - self.opt_dis
 
     def move(self):
-        self.x = self.x + self.V_x
+        self.x = self.x + self.v_x
 
 
 class Logger(object):
