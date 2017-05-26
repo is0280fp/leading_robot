@@ -17,13 +17,20 @@ class Leader(object):
         # 自己位置
         self.x = 0  # 現在位置
         # 速度
-        self.V_x = 1
+        self.V_x = 0
+        self.dis = 0
 
     def measure(self):
         pass
 
     def decide_action(self):
-        pass
+        self.dis = self.G_x - self.x
+        if self.dis > 0:
+            self.V_x = 1
+        elif self.dis == 0:
+            self.V_x = 0
+        else:
+            self.V_x = -1
 
     def move(self):
         self.x = self.x + self.V_x
@@ -39,7 +46,7 @@ class Follower(object):
         self.x = 0  # 現在位置
         # FollowerがLeaderについていく判断
         self.dis = 0
-        self.dx = 0
+        self.V_x = 0
 
     def measure(self, target_x, self_x):
         # LeaderとFollowerの実距離
@@ -48,10 +55,10 @@ class Follower(object):
 
     def decide_action(self):
         self.dis = self.target_x - self.x
-        self.dx = self.dis - self.opt_dis
+        self.V_x = self.dis - self.opt_dis
 
     def move(self):
-        self.x = self.x + self.dx
+        self.x = self.x + self.V_x
 
 
 class Logger(object):
@@ -76,28 +83,27 @@ class Logger(object):
 
 if __name__ == '__main__':
     # 表描画
-    leader = Leader(10)
+    leader = Leader(-10)
     follower = Follower(2)
     logger = Logger()
 
     n = 0
+    logger.log_leader(leader.x)
+    logger.log_follower(follower.x)
+
     while n < 20:
 
-        logger.log_leader(leader.x)
-
-        logger.log_follower(follower.x)
-
         leader.measure()
-
-        leader.decide_action()
-
-        leader.move()
-
         follower.measure(leader.x, follower.x)
 
+        leader.decide_action()
         follower.decide_action()
 
+        leader.move()
         follower.move()
+
+        logger.log_leader(leader.x)
+        logger.log_follower(follower.x)
 
         logger.display()
 
