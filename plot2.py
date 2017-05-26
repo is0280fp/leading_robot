@@ -4,61 +4,101 @@ Created on Wed May 24 16:09:19 2017
 
 @author: yume
 """
-import time
-import numpy as np
+
 import matplotlib.pyplot as plt
 
-#Leader
- #plotする範囲を指定、plot数も指定
-l_x = np.linspace(0, 20, 10)
- #自己位置
-l_x = [] #現在位置を格納するリスト
-l_y = []
-pos_l_x = 0 #現在位置
-pos_l_y = 0
- #目標位置
-G_l_x = 10
-G_l_y = 0
- #速度
-V_l_x = 1
-V_l_y = 0
 
- #Follower
- #plotする範囲を指定、plot数も指定
-f_x = np.linspace(0, 20, 10)
- #自己位置
-f_x = [] #現在位置を格納するリスト
-f_y = []
-pos_f_x = 0 #現在位置
-pos_f_y = 0
-# #目標位置
-#G_f_x = 10
-#G_f_y = 0
-# #速度
-#V_f_x = 1
-#V_f_y = 0
+# Leader
+# plotする範囲を指定、plot数も指定
+class Leader(object):
+    def __init__(self, goal_x):
+        # 目標位置
+        self.G_x = goal_x
+        # 自己位置
+        self.x = 0  # 現在位置
+        # 速度
+        self.V_x = 1
 
- #FollowerがLeaderについていく判断
-#dis = pos_l_x - pos_f_x #LeaderとFollowerの実距離
-opt_dis = 2 #LeaderとFollowerの最適距離
+    def measure(self):
+        pass
 
- #表描画
-n = 0
-while n < G_l_x and G_l_y == 0:
-    l_x.append(pos_l_x)
-    l_y.append(pos_l_y)
-    f_x.append(pos_f_x)
-    f_y.append(pos_f_y)
-    dis = pos_l_x - pos_f_x #LeaderとFollowerの実距離
-    if dis > opt_dis:
-        pos_f_x = pos_f_x + (dis - opt_dis)
-        f_x.append(pos_f_x)
-        f_y.append(pos_f_y)
-    pos_l_x = pos_l_x + V_l_x
-    plt.plot(l_x,l_y,"-*")
-    plt.plot(f_x,f_y,"o")
-    plt.xlim(0,30) #表の軸を0~20に固定
-    plt.show()
-    n += 1 #インクリメント
-    time.sleep(1)
+    def decide_action(self):
+        pass
 
+    def move(self):
+        self.x = self.x + self.V_x
+
+
+# Follower
+# plotする範囲を指定、plot数も指定
+class Follower(object):
+    def __init__(self, opt_dis):
+        # LeaderとFollowerの実距離
+        self.opt_dis = opt_dis  # LeaderとFollowerの最適距離
+        # 自己位置
+        self.x = 0  # 現在位置
+        # FollowerがLeaderについていく判断
+        self.dis = 0
+        self.dx = 0
+
+    def measure(self, target_x, self_x):
+        # LeaderとFollowerの実距離
+        self.target_x = target_x
+        self.x = self_x
+
+    def decide_action(self):
+        self.dis = self.target_x - self.x
+        self.dx = self.dis - self.opt_dis
+
+    def move(self):
+        self.x = self.x + self.dx
+
+
+class Logger(object):
+    def __init__(self):
+        self.l_x = []  # 現在位置を格納するリスト
+        self.f_x = []  # 現在位置を格納するリスト
+
+    def log_leader(self, x):
+        self.l_x.append(x)
+        print(self.l_x)
+
+    def log_follower(self, x):
+        self.f_x.append(x)
+        print(self.f_x)
+
+    def display(self):
+        plt.plot(self.l_x, "-*")
+        plt.plot(self.f_x, "o")
+        plt.xlim(0, 30)  # 表の軸を0~20に固定
+        plt.show()
+
+
+if __name__ == '__main__':
+    # 表描画
+    leader = Leader(10)
+    follower = Follower(2)
+    logger = Logger()
+
+    n = 0
+    while n < 20:
+
+        logger.log_leader(leader.x)
+
+        logger.log_follower(follower.x)
+
+        leader.measure()
+
+        leader.decide_action()
+
+        leader.move()
+
+        follower.measure(leader.x, follower.x)
+
+        follower.decide_action()
+
+        follower.move()
+
+        logger.display()
+
+        n += 1  # インクリメント
