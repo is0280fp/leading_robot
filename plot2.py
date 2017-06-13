@@ -19,6 +19,7 @@ class Leader(object):
         # 速度
         self.v_max = v_max
         self.v_x = 0
+        self.prev_relative_pos = 0
 
     def measure(self, target_x, self_x):
         self.target_x = target_x
@@ -37,7 +38,12 @@ class Leader(object):
             self.v_x = residual
 
         relative_pos = self.target_x - self.x
-        self.v_x = self.v_x + 0.3 * relative_pos
+        d = relative_pos - self.prev_relative_pos
+
+        gain = 0.01 * d
+        self.v_x = self.v_x + gain * relative_pos
+
+        self.prev_relative_pos = relative_pos
 
     def move(self):
         self.x = self.x + self.v_x
