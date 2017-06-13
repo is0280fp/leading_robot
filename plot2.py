@@ -102,6 +102,7 @@ if __name__ == '__main__':
     f_v_max = 3
     l_initial_pos = 0
     f_initial_pos = 0
+    length_step = 20
     leader = Leader(goal_x, l_v_max, l_initial_pos)
     follower = Follower(relative_pos, f_v_max, f_initial_pos)
     logger = Logger()
@@ -110,7 +111,7 @@ if __name__ == '__main__':
     logger.log_leader(leader.x)
     logger.log_follower(follower.x)
 
-    while n < 20:
+    while n < length_step:
 
         leader.measure()
         follower.measure(leader.x, follower.x)
