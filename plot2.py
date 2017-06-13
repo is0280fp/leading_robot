@@ -11,11 +11,11 @@ import matplotlib.pyplot as plt
 # Leader
 # plotする範囲を指定、plot数も指定
 class Leader(object):
-    def __init__(self, goal_x, v_max):
+    def __init__(self, goal_x, v_max, initial_pos):
         # 目標位置
         self.goal_x = goal_x
         # 自己位置
-        self.x = 0  # 現在位置
+        self.x = initial_pos  # 現在位置
         # 速度
         self.v_max = v_max
         self.v_x = 0
@@ -42,13 +42,14 @@ class Leader(object):
 # Follower
 # plotする範囲を指定、plot数も指定
 class Follower(object):
-    def __init__(self, relative_pos):
+    def __init__(self, relative_pos, v_max, initial_pos):
         # LeaderとFollowerの実距離
         self. relative_pos = relative_pos  # LeaderとFollowerの最適距離
         # 自己位置
-        self.x = 0  # 現在位置
+        self.x = initial_pos  # 現在位置
         # FollowerがLeaderについていく判断
         self.v_x = 0
+        self.v_max = v_max
 
     def measure(self, target_x, self_x):
         # LeaderとFollowerの実距離
@@ -59,8 +60,14 @@ class Follower(object):
         pass
 
     def decide_action(self):
-        residual = self.target_x - self.x
-        self.v_x = residual - self.relative_pos
+        goal = self.target_x - self.relative_pos
+        residual = goal - self.x
+        if residual >= 0 and residual >= self.v_max:
+            self.v_x = self.v_max
+        elif residual < 0 and residual <= -self.v_max:
+            self.v_x = -self.v_max
+        else:
+            self.v_x = residual
 
     def move(self):
         self.x = self.x + self.v_x
@@ -91,9 +98,12 @@ if __name__ == '__main__':
     # 表描画
     goal_x = -11
     relative_pos = -2
-    v_max = 5
-    leader = Leader(goal_x, v_max)
-    follower = Follower(relative_pos)
+    l_v_max = 5
+    f_v_max = 3
+    l_initial_pos = 0
+    f_initial_pos = 0
+    leader = Leader(goal_x, l_v_max, l_initial_pos)
+    follower = Follower(relative_pos, f_v_max, f_initial_pos)
     logger = Logger()
 
     n = 0
