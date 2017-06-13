@@ -20,8 +20,9 @@ class Leader(object):
         self.v_max = v_max
         self.v_x = 0
 
-    def measure(self):
-        pass
+    def measure(self, target_x, self_x):
+        self.target_x = target_x
+        self.x = self_x
 
     def estimate(self):
         pass
@@ -34,6 +35,9 @@ class Leader(object):
             self.v_x = -self.v_max
         else:
             self.v_x = residual
+
+        relative_pos = self.target_x - self.x
+        self.v_x = self.v_x + 0.3 * relative_pos
 
     def move(self):
         self.x = self.x + self.v_x
@@ -96,8 +100,8 @@ class Logger(object):
 
 if __name__ == '__main__':
     # 表描画
-    goal_x = -11
-    relative_pos = -2
+    goal_x = 11
+    relative_pos = 2
     l_v_max = 5
     f_v_max = 3
     l_initial_pos = 0
@@ -113,7 +117,7 @@ if __name__ == '__main__':
 
     while n < length_step:
 
-        leader.measure()
+        leader.measure(follower.x, leader.x)
         follower.measure(leader.x, follower.x)
 
         leader.decide_action()
