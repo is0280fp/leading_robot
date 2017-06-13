@@ -20,6 +20,7 @@ class Leader(object):
         self.v_max = v_max
         self.v_x = 0
         self.prev_relative_pos = 0
+        self.sum_residual = 0
 
     def measure(self, target_x, self_x):
         self.target_x = target_x
@@ -30,17 +31,18 @@ class Leader(object):
 
     def decide_action(self):
         residual = self.goal_x - self.x  # ゴールとLeader現在位置(目標値からどれだけずれてい)
+        self.sum_residual += residual
         if residual >= 0 and residual >= self.v_max:
             self.v_x = self.v_max
         elif residual < 0 and residual <= -self.v_max:
             self.v_x = -self.v_max
         else:
-            self.v_x = residual
+            self.v_x = residual + 0.03 * self.sum_residual
 
         relative_pos = self.target_x - self.x
         d = relative_pos - self.prev_relative_pos
 
-        gain = 0.01 * d
+        gain = 0.4
         self.v_x = self.v_x + gain * relative_pos
 
         self.prev_relative_pos = relative_pos
@@ -84,9 +86,10 @@ class Follower(object):
 
 
 class Logger(object):
-    def __init__(self):
+    def __init__(self, length_step):
         self.l_x = []  # 現在位置を格納するリスト
         self.f_x = []  # 現在位置を格納するリスト
+        self.length_step = length_step
 
     def log_leader(self, x):
         self.l_x.append(x)
@@ -99,7 +102,7 @@ class Logger(object):
     def display(self):
         plt.plot(self.l_x, "-*")
         plt.plot(self.f_x, "o")
-        plt.xlim(0, 30)  # 表の軸を0~20に固定
+        plt.xlim(0, self.length_step)  # 表の軸を0~20に固定
         plt.grid()
         plt.show()
 
@@ -115,7 +118,7 @@ if __name__ == '__main__':
     length_step = 20
     leader = Leader(goal_x, l_v_max, l_initial_pos)
     follower = Follower(relative_pos, f_v_max, f_initial_pos)
-    logger = Logger()
+    logger = Logger(length_step)
 
     n = 0
     logger.log_leader(leader.x)
