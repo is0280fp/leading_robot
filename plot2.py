@@ -11,25 +11,29 @@ import matplotlib.pyplot as plt
 # Leader
 # plotする範囲を指定、plot数も指定
 class Leader(object):
-    def __init__(self, goal_x):
+    def __init__(self, goal_x, v_max):
         # 目標位置
         self.goal_x = goal_x
         # 自己位置
         self.x = 0  # 現在位置
         # 速度
+        self.v_max = v_max
         self.v_x = 0
 
     def measure(self):
         pass
 
+    def estimate(self):
+        pass
+
     def decide_action(self):
-        dis = self.goal_x - self.x  # ゴールとLeader現在位置との距離
-        if dis > 0:
-            self.v_x = 1
-        elif dis == 0:
-            self.v_x = 0
+        residual = self.goal_x - self.x  # ゴールとLeader現在位置(目標値からどれだけずれてい)
+        if residual >= 0 and residual >= self.v_max:
+            self.v_x = self.v_max
+        elif residual < 0 and residual <= -self.v_max:
+            self.v_x = -self.v_max
         else:
-            self.v_x = -1
+            self.v_x = residual
 
     def move(self):
         self.x = self.x + self.v_x
@@ -38,9 +42,9 @@ class Leader(object):
 # Follower
 # plotする範囲を指定、plot数も指定
 class Follower(object):
-    def __init__(self, opt_dis):
+    def __init__(self, relative_pos):
         # LeaderとFollowerの実距離
-        self.opt_dis = opt_dis  # LeaderとFollowerの最適距離
+        self. relative_pos = relative_pos  # LeaderとFollowerの最適距離
         # 自己位置
         self.x = 0  # 現在位置
         # FollowerがLeaderについていく判断
@@ -51,9 +55,12 @@ class Follower(object):
         self.target_x = target_x
         self.x = self_x
 
+    def estimate(self):
+        pass
+
     def decide_action(self):
-        dis = self.target_x - self.x
-        self.v_x = dis - self.opt_dis
+        residual = self.target_x - self.x
+        self.v_x = residual - self.relative_pos
 
     def move(self):
         self.x = self.x + self.v_x
@@ -66,23 +73,27 @@ class Logger(object):
 
     def log_leader(self, x):
         self.l_x.append(x)
-        print(self.l_x)
+        #print(self.l_x)
 
     def log_follower(self, x):
         self.f_x.append(x)
-        print(self.f_x)
+        #print(self.f_x)
 
     def display(self):
         plt.plot(self.l_x, "-*")
         plt.plot(self.f_x, "o")
         plt.xlim(0, 30)  # 表の軸を0~20に固定
+        plt.grid()
         plt.show()
 
 
 if __name__ == '__main__':
     # 表描画
-    leader = Leader(-10)
-    follower = Follower(2)
+    goal_x = -11
+    relative_pos = -2
+    v_max = 5
+    leader = Leader(goal_x, v_max)
+    follower = Follower(relative_pos)
     logger = Logger()
 
     n = 0
