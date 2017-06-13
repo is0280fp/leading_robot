@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 # Leader
 # plotする範囲を指定、plot数も指定
 class Leader(object):
-    def __init__(self, goal_x, v_max, initial_pos):
+    def __init__(self, goal_x, v_max, initial_pos, Kp_goal, Ki_goal, Kp_follower):
         # 目標位置
         self.goal_x = goal_x
         # 自己位置
@@ -21,6 +21,9 @@ class Leader(object):
         self.v_x = 0
         self.prev_relative_pos = 0
         self.sum_residual = 0
+        self.Kp_goal = Kp_goal
+        self.Ki_goal = Ki_goal
+        self.Kp_follower = Kp_follower
 
     def measure(self, target_x, self_x):
         self.target_x = target_x
@@ -37,15 +40,10 @@ class Leader(object):
         elif residual < 0 and residual <= -self.v_max:
             self.v_x = -self.v_max
         else:
-            self.v_x = residual + 0.03 * self.sum_residual
+            self.v_x = self.Kp_goal * residual + self.Ki_goal * self.sum_residual
 
         relative_pos = self.target_x - self.x
-        d = relative_pos - self.prev_relative_pos
-
-        gain = 0.4
-        self.v_x = self.v_x + gain * relative_pos
-
-        self.prev_relative_pos = relative_pos
+        self.v_x = self.v_x + self.Kp_follower * relative_pos
 
     def move(self):
         self.x = self.x + self.v_x
@@ -93,11 +91,9 @@ class Logger(object):
 
     def log_leader(self, x):
         self.l_x.append(x)
-        #print(self.l_x)
 
     def log_follower(self, x):
         self.f_x.append(x)
-        #print(self.f_x)
 
     def display(self):
         plt.plot(self.l_x, "-*")
@@ -105,7 +101,8 @@ class Logger(object):
         plt.xlim(0, self.length_step)  # 表の軸を0~20に固定
         plt.grid()
         plt.show()
-
+        print("leader.x", self.l_x[-1])
+        print("follower.x", self.f_x[-1])
 
 if __name__ == '__main__':
     # 表描画
@@ -116,7 +113,11 @@ if __name__ == '__main__':
     l_initial_pos = 0
     f_initial_pos = 0
     length_step = 20
-    leader = Leader(goal_x, l_v_max, l_initial_pos)
+    Kp_goal = 1
+    Ki_goal = 0.03
+    Kp_follower = 0.4
+    leader = Leader(goal_x, l_v_max, l_initial_pos, Kp_goal, Ki_goal,
+                    Kp_follower)
     follower = Follower(relative_pos, f_v_max, f_initial_pos)
     logger = Logger(length_step)
 
