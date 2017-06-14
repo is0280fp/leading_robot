@@ -100,9 +100,15 @@ class Logger(object):
         plt.plot(self.f_x, "o")
         plt.xlim(0, self.length_step)  # 表の軸を0~20に固定
         plt.grid()
-        plt.show()
+        plt.gcf()
+        #plt.show()
         print("leader.x", self.l_x[-1])
         print("follower.x", self.f_x[-1])
+
+    def savefig(self, filename):
+        plt.savefig(filename)
+        self.display()
+        plt.draw()
 
 if __name__ == '__main__':
     # 表描画
@@ -142,3 +148,6 @@ if __name__ == '__main__':
         logger.display()
 
         n += 1  # インクリメント
+
+    logger.savefig(
+        "P={}, I={}, P={}.png".format(Kp_goal, Ki_goal, Kp_follower))
