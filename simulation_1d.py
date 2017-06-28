@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import walking_model
 import parameter_decide
 import evaluation_function
-
+import numpy as np
 
 # Leader
 # plotする範囲を指定、plot数も指定
@@ -44,14 +44,11 @@ class Leader(object):
         elif residual < 0 and residual <= -self.v_max:
             self.v_x = -self.v_max
         else:
-            if residual > 0:
-                residual = -residual
-                self.v_x = self.Kp_goal * residual
-                + self.Ki_goal * self.sum_residual
+            self.v_x = self.Kp_goal * residual + self.Ki_goal * self.sum_residual
 
         relative_pos = self.target_x - self.x
         self.v_x = self.v_x + self.Kp_follower * relative_pos
-        print("sum_residual", sum_residual)
+        print("sum_residual", self.sum_residual)
         print("residual", residual)
         print("relative_pos", relative_pos)
 
@@ -138,6 +135,7 @@ if __name__ == '__main__':
     Ki_goal = 0.01
     Kp_follower = 0.01
     n = 0
+    sum_residual = 0
 
     for i in np.arange(0.01, 1, 0.01):
         n = 0
