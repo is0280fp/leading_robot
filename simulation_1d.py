@@ -6,6 +6,8 @@ Created on Wed May 24 16:09:19 2017
 """
 
 import matplotlib.pyplot as plt
+import walking_model
+import parameter_decide
 
 
 # Leader
@@ -25,9 +27,10 @@ class Leader(object):
         self.Ki_goal = Ki_goal
         self.Kp_follower = Kp_follower
 
-    def measure(self, target_x, self_x):
+    def measure(self, target_x, self_x, t):
         self.target_x = target_x
         self.x = self_x
+        self.t = t
 
     def estimate(self):
         pass
@@ -61,10 +64,11 @@ class Follower(object):
         self.v_x = 0
         self.v_max = v_max
 
-    def measure(self, target_x, self_x):
+    def measure(self, target_x, self_x, t):
         # LeaderとFollowerの実距離
         self.target_x = target_x
         self.x = self_x
+        self.t = t
 
     def estimate(self):
         pass
@@ -72,12 +76,16 @@ class Follower(object):
     def decide_action(self):
         goal = self.target_x - self.relative_pos
         residual = goal - self.x
-        if residual >= 0 and residual >= self.v_max:
-            self.v_x = self.v_max
-        elif residual < 0 and residual <= -self.v_max:
-            self.v_x = -self.v_max
+        if residual >= 0:
+            if residual >= self.v_max:
+                self.v_x = walking_model.abusolute_cos(self.t, self.v_max, 1.5)
+            else:
+                self.v_x = walking_model.abusolute_cos(self.t, residual, 1.5)
         else:
-            self.v_x = residual
+            if residual <= -self.v_max:
+                self.v_x = -walking_model.abusolute_cos(self.t, self.v_max, 1.5)
+            else:
+                self.v_x = -walking_model.abusolute_cos(self.t, residual, 1.5)
 
     def move(self):
         self.x = self.x + self.v_x
@@ -101,7 +109,7 @@ class Logger(object):
         plt.xlim(0, self.length_step)  # 表の軸を0~20に固定
         plt.grid()
         plt.gcf()
-        #plt.show()
+        plt.show()
         print("leader.x", self.l_x[-1])
         print("follower.x", self.f_x[-1])
 
@@ -114,40 +122,51 @@ if __name__ == '__main__':
     # 表描画
     goal_x = 11
     relative_pos = 2
-    l_v_max = 5
-    f_v_max = 3
+    l_v_max = 3
+    f_v_max = 2
     l_initial_pos = 0
     f_initial_pos = 0
     length_step = 20
-    Kp_goal = 1
-    Ki_goal = 0.03
-    Kp_follower = 0.4
-    leader = Leader(goal_x, l_v_max, l_initial_pos, Kp_goal, Ki_goal,
-                    Kp_follower)
-    follower = Follower(relative_pos, f_v_max, f_initial_pos)
-    logger = Logger(length_step)
-
+    Kp_goal = 0.01
+    Ki_goal = 0.01
+    Kp_follower = 0.01
     n = 0
-    logger.log_leader(leader.x)
-    logger.log_follower(follower.x)
 
-    while n < length_step:
+    for i in np.arange(0.01, 1, 0.01):
+        Kp_goal = Kp_goal_decide(Kp_goal)
+        Ki_goal = Ki_goal_decide(Ki_goal)
+        Kp_follower = Kp_follower_decide(Kp_follower)
+        print("Kp_goal", Kp_goal)
+        print("Ki_goal", Ki_goal)
+        print("Kp_follower", Kp_follower)
 
-        leader.measure(follower.x, leader.x)
-        follower.measure(leader.x, follower.x)
-
-        leader.decide_action()
-        follower.decide_action()
-
-        leader.move()
-        follower.move()
+        leader = Leader(goal_x, l_v_max, l_initial_pos, Kp_goal, Ki_goal,
+                        Kp_follower)
+        follower = Follower(relative_pos, f_v_max, f_initial_pos)
+        logger = Logger(length_step)
 
         logger.log_leader(leader.x)
         logger.log_follower(follower.x)
 
+        while n < length_step:
+
+            leader.measure(follower.x, leader.x, n)
+            follower.measure(leader.x, follower.x, n)
+
+            leader.decide_action()
+            follower.decide_action()
+
+            leader.move()
+            follower.move()
+
+            logger.log_leader(leader.x)
+            logger.log_follower(follower.x)
+
+            print("v_x", follower.v_x)
+            #logger.display()
+
+            n += 1  # インクリメント
+
         logger.display()
-
-        n += 1  # インクリメント
-
-    logger.savefig(
-        "P={}, I={}, P={}.png".format(Kp_goal, Ki_goal, Kp_follower))
+#        logger.savefig(
+#            "P={}, I={}, P={}.png".format(Kp_goal, Ki_goal, Kp_follower))
