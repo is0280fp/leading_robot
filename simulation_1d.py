@@ -8,6 +8,7 @@ Created on Wed May 24 16:09:19 2017
 import matplotlib.pyplot as plt
 import walking_model
 import parameter_decide
+import evaluation_function
 
 
 # Leader
@@ -131,14 +132,15 @@ if __name__ == '__main__':
     Ki_goal = 0.01
     Kp_follower = 0.01
     n = 0
+    sum_residual = 0
 
     for i in np.arange(0.01, 1, 0.01):
-        Kp_goal = Kp_goal_decide(Kp_goal)
-        Ki_goal = Ki_goal_decide(Ki_goal)
-        Kp_follower = Kp_follower_decide(Kp_follower)
-        print("Kp_goal", Kp_goal)
-        print("Ki_goal", Ki_goal)
-        print("Kp_follower", Kp_follower)
+        Kp_goal = parameter_decide.Kp_goal_decide(Kp_goal)
+        Ki_goal = parameter_decide.Ki_goal_decide(Ki_goal)
+        Kp_follower = parameter_decide.Kp_follower_decide(Kp_follower)
+#        print("Kp_goal", Kp_goal)
+#        print("Ki_goal", Ki_goal)
+#        print("Kp_follower", Kp_follower)
 
         leader = Leader(goal_x, l_v_max, l_initial_pos, Kp_goal, Ki_goal,
                         Kp_follower)
@@ -165,8 +167,21 @@ if __name__ == '__main__':
             print("v_x", follower.v_x)
             #logger.display()
 
-            n += 1  # インクリメント
+            sum_residual += evaluation_function.evaluation_function(leader.x, follower.x)
 
+            n += 1  # インクリメント
         logger.display()
+        print("sum_residual", sum_residual)
 #        logger.savefig(
 #            "P={}, I={}, P={}.png".format(Kp_goal, Ki_goal, Kp_follower))
+
+    pre_sum_residual = sum_residual
+    if pre_sum_residual < sum_residual:
+        pre_sum_residual = sum_residual
+        best_Kp_goal = Kp_goal
+        best_Ki_goal = Ki_goal
+        best_Kp_follower = Kp_follower
+    print("Kp_goal", Kp_goal)
+    print("Ki_goal", Ki_goal)
+    print("Kp_follower", Kp_follower)
+    print("Least sum_residual", sum_residual)
