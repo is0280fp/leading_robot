@@ -48,9 +48,9 @@ class Leader(object):
 
         relative_pos = self.target_x - self.x
         self.v_x = self.v_x + self.Kp_follower * relative_pos
-        print("sum_residual", self.sum_residual)
-        print("residual", residual)
-        print("relative_pos", relative_pos)
+#        print("sum_residual", self.sum_residual)
+#        print("residual", residual)
+#        print("relative_pos", relative_pos)
 
     def move(self):
         self.x = self.x + self.v_x
@@ -135,7 +135,8 @@ if __name__ == '__main__':
     Ki_goal = 0.01
     Kp_follower = 0.01
     n = 0
-    sum_residual = 0
+    sum_residual = []
+    reaching_distance = []
 
     for i in np.arange(0.01, 1, 0.01):
         n = 0
@@ -173,22 +174,25 @@ if __name__ == '__main__':
             print("leader.v_x", leader.v_x)
             #logger.display()
 
-            sum_residual += evaluation_function.evaluation_function(
-                    leader.x, follower.x)
+            sum_residual.append(evaluation_function.residual_evaluation_function(
+                    leader.x, follower.x))
 
             n += 1  # インクリメント
         logger.display()
-        print("sum_residual", sum_residual)
+        reaching_distance.append(evaluation_function.reaching_evaluation_function(
+                goal_x, leader.x))
 #        logger.savefig(
 #            "P={}, I={}, P={}.png".format(Kp_goal, Ki_goal, Kp_follower))
 
-    pre_sum_residual = sum_residual
-    if pre_sum_residual < sum_residual:
-        pre_sum_residual = sum_residual
-        best_Kp_goal = Kp_goal
-        best_Ki_goal = Ki_goal
-        best_Kp_follower = Kp_follower
-    print(" best_Kp_goal", Kp_goal)
-    print(" best_Ki_goal", Ki_goal)
-    print(" best_Kp_follower", Kp_follower)
-    print(" Least sum_residual", sum_residual)
+#print(sum_residual.index(min(sum_residual)))
+Kp_g = sum_residual.index(min(sum_residual))/length_step * 0.01 + 0.01
+print("Kp_goal", Kp_g)
+print("Least_sum_residual", min(sum_residual))
+#print(reaching_distance.index(min(reaching_distance)))
+Kp_f = reaching_distance.index(min(reaching_distance)) * 0.01 + 0.01
+print("Kp_follower", Kp_f)
+print("Least_reaching_distance", min(reaching_distance))
+
+
+
+
