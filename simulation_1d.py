@@ -111,8 +111,8 @@ class Logger(object):
         plt.grid()
         plt.gcf()
         plt.show()
-        print("leader.x", self.l_x[-1])
-        print("follower.x", self.f_x[-1])
+#        print("leader.x", self.l_x[-1])
+#        print("follower.x", self.f_x[-1])
 
     def savefig(self, filename):
         plt.savefig(filename)
@@ -135,12 +135,13 @@ if __name__ == '__main__':
     sum_residual = 0
 
     for i in np.arange(0.01, 1, 0.01):
+        n = 0
         Kp_goal = parameter_decide.Kp_goal_decide(Kp_goal)
         Ki_goal = parameter_decide.Ki_goal_decide(Ki_goal)
         Kp_follower = parameter_decide.Kp_follower_decide(Kp_follower)
-#        print("Kp_goal", Kp_goal)
-#        print("Ki_goal", Ki_goal)
-#        print("Kp_follower", Kp_follower)
+        print("Kp_goal", Kp_goal)
+        print("Ki_goal", Ki_goal)
+        print("Kp_follower", Kp_follower)
 
         leader = Leader(goal_x, l_v_max, l_initial_pos, Kp_goal, Ki_goal,
                         Kp_follower)
@@ -150,6 +151,8 @@ if __name__ == '__main__':
         logger.log_leader(leader.x)
         logger.log_follower(follower.x)
 
+#        print("length_step", length_step)
+#        print("n", n)
         while n < length_step:
 
             leader.measure(follower.x, leader.x, n)
@@ -164,10 +167,11 @@ if __name__ == '__main__':
             logger.log_leader(leader.x)
             logger.log_follower(follower.x)
 
-            print("v_x", follower.v_x)
+#            print("v_x", follower.v_x)
             #logger.display()
 
-            sum_residual += evaluation_function.evaluation_function(leader.x, follower.x)
+            sum_residual += evaluation_function.evaluation_function(
+                    leader.x, follower.x)
 
             n += 1  # インクリメント
         logger.display()
@@ -181,7 +185,7 @@ if __name__ == '__main__':
         best_Kp_goal = Kp_goal
         best_Ki_goal = Ki_goal
         best_Kp_follower = Kp_follower
-    print("Kp_goal", Kp_goal)
-    print("Ki_goal", Ki_goal)
-    print("Kp_follower", Kp_follower)
-    print("Least sum_residual", sum_residual)
+    print(" best_Kp_goal", Kp_goal)
+    print(" best_Ki_goal", Ki_goal)
+    print(" best_Kp_follower", Kp_follower)
+    print(" Least sum_residual", sum_residual)
