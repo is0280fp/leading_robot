@@ -9,13 +9,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-def evaluation_function(leader_x, follower_x):
+def residual_evaluation_function(leader_x, follower_x):
     residual = (leader_x - follower_x) ** 2
     residual = math.sqrt(residual)
     return residual
+
+def reaching_evaluation_function(goal_x, leader_x):
+    reaching_distance = (goal_x - leader_x) ** 2
+    reaching_distance = math.sqrt(reaching_distance)
+    return reaching_distance
 
 if __name__ == '__main__':
     leader_x = -6
     follower_x = 1
 
-    print(evaluation_function(leader_x, follower_x))
+    print(residual_evaluation_function(leader_x, follower_x))
