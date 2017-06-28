@@ -44,10 +44,16 @@ class Leader(object):
         elif residual < 0 and residual <= -self.v_max:
             self.v_x = -self.v_max
         else:
-            self.v_x = self.Kp_goal * residual + self.Ki_goal * self.sum_residual
+            if residual > 0:
+                residual = -residual
+                self.v_x = self.Kp_goal * residual
+                + self.Ki_goal * self.sum_residual
 
         relative_pos = self.target_x - self.x
         self.v_x = self.v_x + self.Kp_follower * relative_pos
+        print("sum_residual", sum_residual)
+        print("residual", residual)
+        print("relative_pos", relative_pos)
 
     def move(self):
         self.x = self.x + self.v_x
@@ -111,8 +117,8 @@ class Logger(object):
         plt.grid()
         plt.gcf()
         plt.show()
-#        print("leader.x", self.l_x[-1])
-#        print("follower.x", self.f_x[-1])
+        print("leader.x", self.l_x[-1])
+        print("follower.x", self.f_x[-1])
 
     def savefig(self, filename):
         plt.savefig(filename)
@@ -132,7 +138,6 @@ if __name__ == '__main__':
     Ki_goal = 0.01
     Kp_follower = 0.01
     n = 0
-    sum_residual = 0
 
     for i in np.arange(0.01, 1, 0.01):
         n = 0
@@ -167,7 +172,7 @@ if __name__ == '__main__':
             logger.log_leader(leader.x)
             logger.log_follower(follower.x)
 
-#            print("v_x", follower.v_x)
+            print("leader.v_x", leader.v_x)
             #logger.display()
 
             sum_residual += evaluation_function.evaluation_function(
