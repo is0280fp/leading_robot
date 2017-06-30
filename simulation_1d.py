@@ -11,6 +11,7 @@ import parameter_decide
 import evaluation_function
 import numpy as np
 
+
 # Leader
 # plotする範囲を指定、plot数も指定
 class Leader(object):
@@ -48,7 +49,7 @@ class Leader(object):
 
         relative_pos = self.target_x - self.x
         self.v_x = self.v_x + self.Kp_follower * relative_pos
-#        print("sum_residual", self.sum_residual)
+        print("sum_residual", self.sum_residual)
 #        print("residual", residual)
 #        print("relative_pos", relative_pos)
 
@@ -124,13 +125,13 @@ class Logger(object):
 
 if __name__ == '__main__':
     # 表描画
-    goal_x = 11
+    goal_x = 12
     relative_pos = 2
     l_v_max = 3
     f_v_max = 2
     l_initial_pos = 0
     f_initial_pos = 0
-    length_step = 20
+    length_step = 27
     Kp_goal = 0.01
     Ki_goal = 0.01
     Kp_follower = 0.01
@@ -172,27 +173,19 @@ if __name__ == '__main__':
             logger.log_follower(follower.x)
 
             print("leader.v_x", leader.v_x)
-            #logger.display()
-
-            sum_residual.append(evaluation_function.residual_evaluation_function(
-                    leader.x, follower.x))
+            # logger.display()
 
             n += 1  # インクリメント
         logger.display()
+        sum_residual.append(leader.sum_residual)
         reaching_distance.append(evaluation_function.reaching_evaluation_function(
                 goal_x, leader.x))
-#        logger.savefig(
-#            "P={}, I={}, P={}.png".format(Kp_goal, Ki_goal, Kp_follower))
 
-#print(sum_residual.index(min(sum_residual)))
-Kp_g = sum_residual.index(min(sum_residual))/length_step * 0.01 + 0.01
-print("Kp_goal", Kp_g)
-print("Least_sum_residual", min(sum_residual))
-#print(reaching_distance.index(min(reaching_distance)))
-Kp_f = reaching_distance.index(min(reaching_distance)) * 0.01 + 0.01
-print("Kp_follower", Kp_f)
+print(" ")
+print("Least_sum_residual", min(map(abs, sum_residual)))
+# print(reaching_distance.index(min(reaching_distance)))
+# Kp_f = reaching_distance.index(min(reaching_distance)) * 0.01 + 0.01
+# print("Kp_follower", Kp_f)
 print("Least_reaching_distance", min(reaching_distance))
-
-
-
-
+print(" ")
+print("sum_residual", sum_residual)
