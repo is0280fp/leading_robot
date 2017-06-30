@@ -23,8 +23,8 @@ def walking_model(t, d_max, d_stance, t_swing, t_stance):
 
     return d_t
 
-def abusolute_cos(t):
-    d_t = -abs(math.cos(t)) + 1
+def abusolute_cos(t, v_max, t_cycle):
+    d_t = -v_max * abs(math.cos(math.pi / t_cycle * t)) + v_max
     return d_t
 
 if __name__ == '__main__':
@@ -33,12 +33,14 @@ if __name__ == '__main__':
     d_stance = 0.4
     t_swing = 1.1
     t_stance = 0.4
+    t_cycle = t_swing + t_stance
+    v_max = 2
     d_t = []
-    ts = np.arange(0, 7, 1)
+    ts = np.arange(0, 7, 0.01)
 
     for t in ts:
-        d_t.append(walking_model(t, d_max, d_stance, t_swing, t_stance))
-#        d_t.append(abusolute_cos(t))
+#        d_t.append(walking_model(t, d_max, d_stance, t_swing, t_stance))
+        d_t.append(abusolute_cos(t, v_max, t_cycle))
 
     plt.plot(ts, d_t) # このままでは横軸にd_tの添え字が入る
     plt.show()
