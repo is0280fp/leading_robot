@@ -7,24 +7,22 @@ Created on Wed May 24 16:09:19 2017
 
 import matplotlib.pyplot as plt
 import walking_model
-import parameter_decide
 import evaluation_function
-import numpy as np
 
 
 # Leader
 # plotする範囲を指定、plot数も指定
 class Leader(object):
-    def __init__(self, goal_x, v_max, initial_pos, Kp_goal, Ki_goal,
-                 Kp_follower, importance_goal):
+    def __init__(self, goal_x, v_max, initial_pos, leading_relative_pos,
+                 Kp_goal, Ki_goal, Kp_follower, importance_goal):
         # 目標位置
         self.goal_x = goal_x
+        self.leading_relative_pos = leading_relative_pos
         # 自己位置
         self.x = initial_pos  # 現在位置
         # 速度
         self.v_max = v_max
         self.v_x = 0
-        self.prev_relative_pos = 0
         self.sum_residual = 0
         self.Kp_goal = Kp_goal
         self.Ki_goal = Ki_goal
@@ -45,7 +43,8 @@ class Leader(object):
         v_goal = self.Kp_goal * residual + self.Ki_goal * self.sum_residual
 
         relative_pos = self.target_x - self.x
-        v_follower = self.Kp_follower * relative_pos
+        residual = self.leading_relative_pos + relative_pos
+        v_follower = self.Kp_follower * residual
 
         v_x = self.importance_goal * v_goal + \
             (1 - self.importance_goal) * v_follower
@@ -96,7 +95,8 @@ class Follower(object):
                 self.v_x = walking_model.abusolute_cos(self.t, residual, 1.5)
         else:
             if residual <= -self.v_max:
-                self.v_x = -walking_model.abusolute_cos(self.t, self.v_max, 1.5)
+                self.v_x = -walking_model.abusolute_cos(
+                    self.t, self.v_max, 1.5)
             else:
                 self.v_x = -walking_model.abusolute_cos(self.t, residual, 1.5)
 
@@ -143,13 +143,13 @@ if __name__ == '__main__':
     Kp_goal = 1
     Ki_goal = 0.01
     Kp_follower = 0.7
-    n = 0
     importance_goal = 0.4
+    n = 0
     sum_residual = []
     reaching_distance = []
 
-    leader = Leader(goal_x, l_v_max, l_initial_pos, Kp_goal, Ki_goal,
-                    Kp_follower, importance_goal)
+    leader = Leader(goal_x, l_v_max, l_initial_pos, relative_pos,
+                    Kp_goal, Ki_goal, Kp_follower, importance_goal)
     follower = Follower(relative_pos, f_v_max, f_initial_pos)
     logger = Logger(length_step)
 
