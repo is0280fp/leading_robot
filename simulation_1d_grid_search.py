@@ -187,11 +187,11 @@ if __name__ == '__main__':
                 evaluation_function.reaching_evaluation_function(
                         goal_x, leader.x))
 
-print(" ")
-print("Least_sum_residual", min(map(abs, sum_residual)))
-# print(reaching_distance.index(min(reaching_distance)))
-# Kp_f = reaching_distance.index(min(reaching_distance)) * 0.01 + 0.01
-# print("Kp_follower", Kp_f)
-print("Least_reaching_distance", min(reaching_distance))
-print(" ")
-print("sum_residual", sum_residual)
+    print(" ")
+    print("Least_sum_residual", min(map(abs, sum_residual)))
+    # print(reaching_distance.index(min(reaching_distance)))
+    # Kp_f = reaching_distance.index(min(reaching_distance)) * 0.01 + 0.01
+    # print("Kp_follower", Kp_f)
+    print("Least_reaching_distance", min(reaching_distance))
+    print(" ")
+    print("sum_residual", sum_residual)

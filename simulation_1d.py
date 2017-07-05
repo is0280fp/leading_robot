@@ -182,8 +182,8 @@ if __name__ == '__main__':
     reaching_distance.append(evaluation_function.reaching_evaluation_function(
             goal_x, leader.x))
 
-print(" ")
-print("Kp_goal", Kp_goal)
-print("sum_residual", sum_residual)
-print("Kp_follower", Kp_follower)
-print("reaching_distance", min(reaching_distance))
+    print(" ")
+    print("Kp_goal", Kp_goal)
+    print("sum_residual", sum_residual)
+    print("Kp_follower", Kp_follower)
+    print("reaching_distance", min(reaching_distance))
