@@ -7,6 +7,7 @@ Created on Wed May 24 16:09:19 2017
 
 import evaluation_function
 import itertools
+import numpy as np
 from simulation_1d import Leader, Follower, Logger
 
 if __name__ == '__main__':
@@ -28,16 +29,18 @@ if __name__ == '__main__':
     Kp_goals = np.linspace(0.01, 1, 10)
     Ki_goals = np.linspace(0.01, 1, 10)
     Kp_followers = np.linspace(0.01, 1, 10)
-    params = itertools.product(Kp_goals, Ki_goals, Kp_followers)
+    importance_goals = np.linspace(0, 1, 10)
+    params = itertools.product(
+        Kp_goals, Ki_goals, Kp_followers, importance_goals)
 
-    for Kp_goal, Ki_goal, Kp_follower in params:
+    for Kp_goal, Ki_goal, Kp_follower, importance_goal in params:
         n = 0
         print("Kp_goal", Kp_goal)
         print("Ki_goal", Ki_goal)
         print("Kp_follower", Kp_follower)
 
         leader = Leader(goal_x, l_v_max, l_initial_pos, Kp_goal, Ki_goal,
-                        Kp_follower)
+                        Kp_follower, importance_goal)
         follower = Follower(relative_pos, f_v_max, f_initial_pos)
         logger = Logger(length_step)
 
