@@ -7,15 +7,16 @@ Created on Wed May 24 16:09:19 2017
 
 import matplotlib.pyplot as plt
 import walking_model
-import parameter_decide
 import evaluation_function
 import numpy as np
+import itertools
 
 
 # Leader
 # plotする範囲を指定、plot数も指定
 class Leader(object):
-    def __init__(self, goal_x, v_max, initial_pos, Kp_goal, Ki_goal, Kp_follower):
+    def __init__(self, goal_x, v_max, initial_pos,
+                 Kp_goal, Ki_goal, Kp_follower):
         # 目標位置
         self.goal_x = goal_x
         # 自己位置
@@ -45,7 +46,8 @@ class Leader(object):
         elif residual < 0 and residual <= -self.v_max:
             self.v_x = -self.v_max
         else:
-            self.v_x = self.Kp_goal * residual + self.Ki_goal * self.sum_residual
+            self.v_x = self.Kp_goal * residual + \
+                self.Ki_goal * self.sum_residual
 
         relative_pos = self.target_x - self.x
         self.v_x = self.v_x + self.Kp_follower * relative_pos
@@ -88,7 +90,8 @@ class Follower(object):
                 self.v_x = walking_model.abusolute_cos(self.t, residual, 1.5)
         else:
             if residual <= -self.v_max:
-                self.v_x = -walking_model.abusolute_cos(self.t, self.v_max, 1.5)
+                self.v_x = -walking_model.abusolute_cos(
+                        self.t, self.v_max, 1.5)
             else:
                 self.v_x = -walking_model.abusolute_cos(self.t, residual, 1.5)
 
@@ -132,18 +135,20 @@ if __name__ == '__main__':
     l_initial_pos = 0
     f_initial_pos = 0
     length_step = 27
-    Kp_goal = 0.01
-    Ki_goal = 0.01
-    Kp_follower = 0.01
+    Kp_goal = 0
+    Ki_goal = 0
+    Kp_follower = 0
     n = 0
     sum_residual = []
     reaching_distance = []
 
-    for i in np.arange(0.01, 1, 0.01):
+    Kp_goals = np.linspace(0.01, 1, 10)
+    Ki_goals = np.linspace(0.01, 1, 10)
+    Kp_followers = np.linspace(0.01, 1, 10)
+    params = itertools.product(Kp_goals, Ki_goals, Kp_followers)
+
+    for Kp_goal, Ki_goal, Kp_follower in params:
         n = 0
-        Kp_goal = parameter_decide.Kp_goal_decide(Kp_goal)
-        Ki_goal = parameter_decide.Ki_goal_decide(Ki_goal)
-        Kp_follower = parameter_decide.Kp_follower_decide(Kp_follower)
         print("Kp_goal", Kp_goal)
         print("Ki_goal", Ki_goal)
         print("Kp_follower", Kp_follower)
@@ -178,8 +183,9 @@ if __name__ == '__main__':
             n += 1  # インクリメント
         logger.display()
         sum_residual.append(leader.sum_residual)
-        reaching_distance.append(evaluation_function.reaching_evaluation_function(
-                goal_x, leader.x))
+        reaching_distance.append(
+                evaluation_function.reaching_evaluation_function(
+                        goal_x, leader.x))
 
 print(" ")
 print("Least_sum_residual", min(map(abs, sum_residual)))
