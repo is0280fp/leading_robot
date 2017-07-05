@@ -15,7 +15,8 @@ import numpy as np
 # Leader
 # plotする範囲を指定、plot数も指定
 class Leader(object):
-    def __init__(self, goal_x, v_max, initial_pos, Kp_goal, Ki_goal, Kp_follower):
+    def __init__(self, goal_x, v_max, initial_pos, Kp_goal, Ki_goal,
+                 Kp_follower, importance_goal):
         # 目標位置
         self.goal_x = goal_x
         # 自己位置
@@ -28,6 +29,7 @@ class Leader(object):
         self.Kp_goal = Kp_goal
         self.Ki_goal = Ki_goal
         self.Kp_follower = Kp_follower
+        self.importance_goal = importance_goal
 
     def measure(self, target_x, self_x, t):
         self.target_x = target_x
@@ -40,18 +42,24 @@ class Leader(object):
     def decide_action(self):
         residual = self.goal_x - self.x  # ゴールとLeader現在位置(目標値からどれだけずれてい)
         self.sum_residual += residual
-        if residual >= 0 and residual >= self.v_max:
-            self.v_x = self.v_max
-        elif residual < 0 and residual <= -self.v_max:
-            self.v_x = -self.v_max
-        else:
-            self.v_x = self.Kp_goal * residual + self.Ki_goal * self.sum_residual
+        v_goal = self.Kp_goal * residual + self.Ki_goal * self.sum_residual
 
         relative_pos = self.target_x - self.x
-        self.v_x = self.v_x + self.Kp_follower * relative_pos
+        v_follower = self.Kp_follower * relative_pos
+
+        v_x = self.importance_goal * v_goal + \
+            (1 - self.importance_goal) * v_follower
+
+        if abs(v_x) > self.v_max:
+            if v_x > 0:
+                v_x = self.v_max
+            else:
+                v_x = - self.v_max
+        self.v_x = v_x
+
         print("sum_residual", self.sum_residual)
         print("residual", residual)
-#        print("relative_pos", relative_pos)
+        print("relative_pos", relative_pos)
 
     def move(self):
         self.x = self.x + self.v_x
@@ -132,15 +140,16 @@ if __name__ == '__main__':
     l_initial_pos = 0
     f_initial_pos = 0
     length_step = 30
-    Kp_goal = 0.05
-    Ki_goal = 0.05
+    Kp_goal = 1
+    Ki_goal = 0.01
     Kp_follower = 0.7
     n = 0
+    importance_goal = 0.4
     sum_residual = []
     reaching_distance = []
 
     leader = Leader(goal_x, l_v_max, l_initial_pos, Kp_goal, Ki_goal,
-                    Kp_follower)
+                    Kp_follower, importance_goal)
     follower = Follower(relative_pos, f_v_max, f_initial_pos)
     logger = Logger(length_step)
 
